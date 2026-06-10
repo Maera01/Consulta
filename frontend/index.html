@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maera | Consulta de Componentes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Maera">
+      <img src="./img/logo_header.png" alt="Maera">
+    </a>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div>
+        <h1>Consulta de componentes</h1>
+        <p>Pesquise por código ou descrição e selecione os itens que deseja solicitar.</p>
+      </div>
+      <div class="metric">
+        <strong id="total-components">0</strong>
+        <span>componentes disponíveis</span>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="catalog card">
+        <div class="section-heading">
+          <div>
+            <h2>Componentes</h2>
+          </div>
+          <button class="button button-ghost" id="clear-filters" type="button">Limpar filtros</button>
+        </div>
+
+        <form class="filters" id="filters">
+          <label>
+            <span>Código</span>
+            <input name="codigo" placeholder="Ex.: 10234" autocomplete="off">
+          </label>
+          <label class="filter-description">
+            <span>Descrição</span>
+            <input name="descricao" placeholder="Ex.: resistor 6k 0805" autocomplete="off">
+          </label>
+        </form>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="check-column"><span class="sr-only">Selecionar</span></th>
+                <th><button data-sort="codigo">Código</button></th>
+                <th><button data-sort="descricao">Descrição</button></th>
+              </tr>
+            </thead>
+            <tbody id="component-rows"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state" hidden>
+            <strong>Nenhum componente encontrado.</strong>
+            <span>Revise os filtros ou tente uma descrição mais ampla.</span>
+          </div>
+        </div>
+
+        <footer class="pagination">
+          <span id="page-info">Página 1 de 1</span>
+          <div>
+            <button class="icon-button" id="previous-page" aria-label="Página anterior">←</button>
+            <button class="icon-button" id="next-page" aria-label="Próxima página">→</button>
+          </div>
+        </footer>
+      </div>
+
+      <aside class="request-panel card">
+        <span class="eyebrow">Solicitação</span>
+        <div class="request-title">
+          <h2>Itens selecionados</h2>
+          <span class="count-badge" id="selected-count">0</span>
+        </div>
+        <div class="selected-list" id="selected-list">
+          <div class="selection-empty">
+            <span>+</span>
+            <p>Selecione componentes na tabela para montar sua solicitação.</p>
+          </div>
+        </div>
+        <div class="request-actions">
+          <button class="button button-primary" id="copy-request" disabled>Copiar solicitação</button>
+          <button class="button button-ghost" id="clear-selection" disabled>Limpar seleção</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="import-card card">
+      <div>
+        <span class="eyebrow">Administração</span>
+        <h2>Importar planilha</h2>
+        <p>Envie o relatório de estoque XLS, XLSX ou CSV. O sistema localiza automaticamente as colunas de código e descrição.</p>
+      </div>
+      <form class="import-form" id="import-form">
+        <label class="file-field">
+          <span>Planilha</span>
+          <input id="spreadsheet-file" name="planilha" type="file" accept=".xls,.xlsx,.csv" required>
+        </label>
+        <label class="import-password">
+          <span>Senha</span>
+          <input id="import-password" name="senha" type="password" inputmode="numeric" autocomplete="current-password" required>
+        </label>
+        <button class="button button-primary" id="import-button" type="submit">Atualizar banco</button>
+      </form>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./js/config.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
