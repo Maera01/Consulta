@@ -50,29 +50,31 @@ try {
     }
 
     $components = mapComponents($rows);
-    $pdo = connectLocalDatabase();
+    $pdo = connectDatabase();
     $pdo->beginTransaction();
 
-    $update = $pdo->prepare(
-        'UPDATE componentes
-         SET descricao = :descricao, atualizado_em = CURRENT_TIMESTAMP
-         WHERE codigo = :codigo'
-    );
-    $insert = $pdo->prepare(
-        'INSERT INTO componentes (codigo, descricao)
-         VALUES (:codigo, :descricao)'
+    $existingCodes = existingCodes($pdo, array_column($components, 'codigo'));
+    $upsert = $pdo->prepare(
+        databaseDriver($pdo) === 'pgsql'
+            ? 'INSERT INTO componentes (codigo, descricao)
+               VALUES (:codigo, :descricao)
+               ON CONFLICT (codigo) DO UPDATE SET descricao = EXCLUDED.descricao'
+            : 'INSERT INTO componentes (codigo, descricao, atualizado_em)
+               VALUES (:codigo, :descricao, CURRENT_TIMESTAMP)
+               ON CONFLICT (codigo) DO UPDATE SET
+                   descricao = excluded.descricao,
+                   atualizado_em = CURRENT_TIMESTAMP'
     );
 
     $inserted = 0;
     $updated = 0;
     foreach ($components as $component) {
-        $update->execute($component);
-        if ($update->rowCount() > 0) {
+        $upsert->execute($component);
+        if (isset($existingCodes[$component['codigo']])) {
             $updated++;
-            continue;
+        } else {
+            $inserted++;
         }
-        $insert->execute($component);
-        $inserted++;
     }
 
     $pdo->commit();
@@ -89,7 +91,7 @@ try {
     respond($error instanceof RuntimeException ? 400 : 500, [
         'error' => $error instanceof RuntimeException
             ? $error->getMessage()
-            : 'Não foi possível importar a planilha no banco local.',
+            : 'Não foi possível importar a planilha no banco de dados.',
     ]);
 }
 
@@ -99,6 +101,20 @@ function validateImportPassword(): void
     if (!password_verify($password, IMPORT_PASSWORD_HASH)) {
         throw new RuntimeException('Senha de importação inválida.');
     }
+}
+
+function existingCodes(PDO $pdo, array $codes): array
+{
+    $existing = [];
+    foreach (array_chunk($codes, 500) as $chunk) {
+        $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+        $query = $pdo->prepare("SELECT codigo FROM componentes WHERE codigo IN ({$placeholders})");
+        $query->execute(array_values($chunk));
+        foreach ($query->fetchAll(PDO::FETCH_COLUMN) as $code) {
+            $existing[(string) $code] = true;
+        }
+    }
+    return $existing;
 }
 
 function mapComponents(array $rows): array

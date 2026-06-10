@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
-    $pdo = connectLocalDatabase();
+    $pdo = connectDatabase();
+    $postgres = databaseDriver($pdo) === 'pgsql';
     $allowedSorts = ['codigo', 'descricao'];
     $sort = in_array($_GET['sort'] ?? '', $allowedSorts, true) ? $_GET['sort'] : 'descricao';
     $direction = ($_GET['direction'] ?? '') === 'desc' ? 'DESC' : 'ASC';
@@ -35,7 +36,9 @@ try {
         }
         foreach (preg_split('/\s+/', $value) as $index => $word) {
             $key = ':' . $column . $index;
-            $conditions[] = "{$column} LIKE {$key} COLLATE NOCASE";
+            $conditions[] = $postgres
+                ? "{$column} ILIKE {$key}"
+                : "{$column} LIKE {$key} COLLATE NOCASE";
             $parameters[$key] = '%' . $word . '%';
         }
     }
@@ -61,8 +64,9 @@ try {
     echo json_encode([
         'items' => $query->fetchAll(),
         'total' => $total,
+        'database' => $postgres ? 'neon' : 'local',
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $error) {
     http_response_code(500);
-    echo json_encode(['error' => 'Não foi possível consultar o banco local.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['error' => 'Não foi possível consultar o banco de dados.'], JSON_UNESCAPED_UNICODE);
 }

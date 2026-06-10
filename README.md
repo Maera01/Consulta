@@ -28,3 +28,17 @@ O projeto usa Docker porque o Render não possui runtime PHP nativo.
 2. O Render utilizará automaticamente o `Dockerfile` e o `render.yaml`.
 
 O SQLite funciona no Render, mas no plano gratuito os dados enviados por planilha podem ser perdidos após um novo deploy ou reinicialização. Para persistência permanente, utilize um Persistent Disk ou banco externo.
+
+## Schema do Neon
+
+Execute `database/neon-schema.sql` no SQL Editor do Neon para criar a tabela PostgreSQL de componentes, índices de pesquisa e atualização automática da data de alteração.
+
+Depois, copie a **Connection string** do Neon e adicione no Render:
+
+1. Abra o serviço no Render.
+2. Acesse **Environment**.
+3. Crie a variável `DATABASE_URL`.
+4. Cole a connection string completa do Neon como valor.
+5. Salve e aguarde o novo deploy.
+
+Quando `DATABASE_URL` estiver configurada, consultas e importações usam o Neon. Sem essa variável, o aplicativo continua usando o SQLite local.
