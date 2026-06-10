@@ -74,6 +74,7 @@ tbody tr.is-selected { background: var(--maera-soft); }
 .row-check { accent-color: var(--maera); height: 16px; width: 16px; }
 .code { color: var(--ink); font-weight: 800; }
 .empty-state { align-items: center; color: var(--muted); display: flex; flex-direction: column; gap: 8px; justify-content: center; min-height: 390px; text-align: center; }
+.empty-state[hidden] { display: none; }
 .empty-state strong { color: var(--ink); font-size: 15px; }
 .empty-state span { font-size: 12px; }
 .pagination { align-items: center; border-top: 1px solid var(--border); color: var(--muted); display: flex; font-size: 11px; justify-content: space-between; padding: 14px 26px; }
