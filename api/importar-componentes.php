@@ -51,25 +51,12 @@ try {
 
     $components = mapComponents($rows);
     $pdo = connectDatabase();
-    $pdo->beginTransaction();
-
     $existingCodes = existingCodes($pdo, array_column($components, 'codigo'));
-    $upsert = $pdo->prepare(
-        databaseDriver($pdo) === 'pgsql'
-            ? 'INSERT INTO componentes (codigo, descricao)
-               VALUES (:codigo, :descricao)
-               ON CONFLICT (codigo) DO UPDATE SET descricao = EXCLUDED.descricao'
-            : 'INSERT INTO componentes (codigo, descricao, atualizado_em)
-               VALUES (:codigo, :descricao, CURRENT_TIMESTAMP)
-               ON CONFLICT (codigo) DO UPDATE SET
-                   descricao = excluded.descricao,
-                   atualizado_em = CURRENT_TIMESTAMP'
-    );
+    upsertComponents($pdo, $components);
 
     $inserted = 0;
     $updated = 0;
     foreach ($components as $component) {
-        $upsert->execute($component);
         if (isset($existingCodes[$component['codigo']])) {
             $updated++;
         } else {
@@ -77,7 +64,6 @@ try {
         }
     }
 
-    $pdo->commit();
     respond(200, [
         'message' => 'Planilha importada com sucesso.',
         'processed' => count($components),
@@ -85,14 +71,52 @@ try {
         'updated' => $updated,
     ]);
 } catch (Throwable $error) {
-    if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
     respond($error instanceof RuntimeException ? 400 : 500, [
         'error' => $error instanceof RuntimeException
             ? $error->getMessage()
             : 'Não foi possível importar a planilha no banco de dados.',
     ]);
+}
+
+function upsertComponents(PDO $pdo, array $components): void
+{
+    $postgres = databaseDriver($pdo) === 'pgsql';
+    foreach (array_chunk($components, 300) as $batchNumber => $batch) {
+        $values = [];
+        $parameters = [];
+        foreach ($batch as $index => $component) {
+            $codeKey = "codigo_{$index}";
+            $descriptionKey = "descricao_{$index}";
+            $values[] = "(:{$codeKey}, :{$descriptionKey})";
+            $parameters[$codeKey] = $component['codigo'];
+            $parameters[$descriptionKey] = $component['descricao'];
+        }
+
+        $updateTimestamp = $postgres
+            ? ''
+            : ', atualizado_em = CURRENT_TIMESTAMP';
+        $sql = 'INSERT INTO componentes (codigo, descricao) VALUES '
+            . implode(', ', $values)
+            . ' ON CONFLICT (codigo) DO UPDATE SET descricao = excluded.descricao'
+            . $updateTimestamp;
+
+        try {
+            $query = $pdo->prepare($sql);
+            $query->execute($parameters);
+        } catch (PDOException $error) {
+            throw new RuntimeException(
+                'Falha ao gravar o lote ' . ($batchNumber + 1) . ': ' . databaseErrorMessage($error),
+                0,
+                $error
+            );
+        }
+    }
+}
+
+function databaseErrorMessage(PDOException $error): string
+{
+    $details = $error->errorInfo[2] ?? $error->getMessage();
+    return preg_replace('/\s+/', ' ', trim((string) $details)) ?: 'erro desconhecido no banco de dados';
 }
 
 function validateImportPassword(): void
