@@ -1,9 +1,10 @@
 FROM php:8.3-apache
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install dom mbstring pdo_sqlite simplexml zip \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends libzip-dev \
+    && docker-php-ext-install zip \
+    && rm -rf /var/lib/apt/lists/* \
+    && php -r "foreach (['dom', 'mbstring', 'pdo_sqlite', 'SimpleXML', 'zip'] as \$extension) { if (!extension_loaded(\$extension)) { exit(1); } }"
 
 COPY . /var/www/html
 COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
