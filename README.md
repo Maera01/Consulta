@@ -19,3 +19,12 @@ No relatório do sistema, o cabeçalho útil é localizado automaticamente e as 
 - `Descrição` → descrição
 
 Na importação, componentes com o mesmo `codigo` são atualizados. Códigos que ainda não existem são inseridos. Linhas vazias são ignoradas e, se um código se repetir na planilha, a última ocorrência prevalece.
+
+## Deploy no Render
+
+O projeto usa Docker porque o Render não possui runtime PHP nativo.
+
+1. No Render, crie um novo **Blueprint** usando este repositório, ou altere o runtime do serviço para **Docker**.
+2. O Render utilizará automaticamente o `Dockerfile` e o `render.yaml`.
+
+O SQLite funciona no Render, mas no plano gratuito os dados enviados por planilha podem ser perdidos após um novo deploy ou reinicialização. Para persistência permanente, utilize um Persistent Disk ou banco externo.

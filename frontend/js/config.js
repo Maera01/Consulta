@@ -1,5 +1,8 @@
+const apiBaseUrl = window.location.port === "5500"
+  ? "http://localhost/consulta-componente/api"
+  : `${window.location.origin}/api`;
+
 window.APP_CONFIG = {
-  // As APIs PHP precisam ser executadas pelo Apache do XAMPP.
-  COMPONENTS_API_URL: "http://localhost/consulta-componente/api/componentes.php",
-  IMPORT_API_URL: "http://localhost/consulta-componente/api/importar-componentes.php"
+  COMPONENTS_API_URL: `${apiBaseUrl}/componentes.php`,
+  IMPORT_API_URL: `${apiBaseUrl}/importar-componentes.php`
 };

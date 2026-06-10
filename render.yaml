@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: consulta-componentes
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /api/componentes.php?limit=1
