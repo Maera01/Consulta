@@ -33,10 +33,10 @@ button { cursor: pointer; }
 .connection-status { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
 .connection-status.online { color: var(--success); }
 .connection-status.error { color: var(--maera); }
-.user-menu { align-items: center; display: flex; gap: 12px; }
-.user-menu span { color: var(--ink); font-size: 11px; font-weight: 800; text-transform: capitalize; }
-.user-menu button { background: transparent; border: 0; color: var(--muted); font-size: 10px; font-weight: 800; padding: 6px; text-transform: uppercase; }
-.user-menu button:hover { color: var(--maera); }
+.user-menu { align-items: center; background: #f7f7f8; border: 1px solid var(--border); border-radius: 50px; display: flex; gap: 4px; padding: 4px 5px 4px 14px; }
+.user-menu span { color: var(--ink); font-size: 11px; font-weight: 700; text-transform: capitalize; }
+.user-menu button { background: var(--surface); border: 1px solid var(--border); border-radius: 50px; color: var(--maera); font-size: 9px; font-weight: 800; padding: 7px 12px; text-transform: uppercase; transition: .2s ease; }
+.user-menu button:hover { background: var(--maera); border-color: var(--maera); color: white; }
 
 .login-page { align-items: center; display: flex; justify-content: center; min-height: 100vh; padding: 24px; }
 .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-width: 390px; padding: 30px 28px 28px; text-align: center; width: 100%; }
