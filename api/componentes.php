@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -17,6 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['error' => 'Método não permitido.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
+
+requireAuthenticatedApi();
 
 try {
     $pdo = connectDatabase();

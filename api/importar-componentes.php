@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/auth.php';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_ROWS = 20000;
@@ -21,6 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     respond(405, ['error' => 'Método não permitido.']);
 }
+
+requireAuthenticatedApi();
 
 try {
     validateImportPassword();

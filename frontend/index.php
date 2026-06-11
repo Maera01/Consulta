@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../api/auth.php';
+$currentUser = requireAuthenticatedPage();
+?>
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -14,6 +18,10 @@
     <a class="brand" href="/" aria-label="Maera">
       <img src="./img/logo_header.png" alt="Maera">
     </a>
+    <form class="user-menu" method="post" action="<?= htmlspecialchars(appRootPath(), ENT_QUOTES, 'UTF-8') ?>">
+      <span><?= htmlspecialchars($currentUser['login'], ENT_QUOTES, 'UTF-8') ?></span>
+      <button name="logout" value="1" type="submit">Sair</button>
+    </form>
   </header>
 
   <main class="page">

@@ -42,3 +42,9 @@ Depois, copie a **Connection string** do Neon e adicione no Render:
 5. Salve e aguarde o novo deploy.
 
 Quando `DATABASE_URL` estiver configurada, consultas e importações usam o Neon. Sem essa variável, o aplicativo continua usando o SQLite local.
+
+## Usuários
+
+O acesso ao aplicativo exige login. Os usuários ficam na tabela `public.usuarios`, e as senhas são armazenadas somente como hashes bcrypt.
+
+O arquivo local `database/usuarios-seed.sql` contém a carga inicial gerada a partir da planilha de usuários e não é enviado ao GitHub. Execute esse arquivo no SQL Editor do Neon após executar `database/neon-schema.sql`.

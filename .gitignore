@@ -2,3 +2,4 @@
 /database/componentes.sqlite
 /database/componentes.sqlite-shm
 /database/componentes.sqlite-wal
+/database/usuarios-seed.sql

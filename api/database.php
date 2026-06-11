@@ -61,6 +61,15 @@ function connectSqlite(): PDO
     );
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_componentes_codigo ON componentes (codigo COLLATE NOCASE)');
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_componentes_descricao ON componentes (descricao COLLATE NOCASE)');
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            login TEXT NOT NULL UNIQUE,
+            senha_hash TEXT NOT NULL,
+            ativo INTEGER NOT NULL DEFAULT 1,
+            criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )'
+    );
 
     return $pdo;
 }

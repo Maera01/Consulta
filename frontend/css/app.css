@@ -33,6 +33,19 @@ button { cursor: pointer; }
 .connection-status { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
 .connection-status.online { color: var(--success); }
 .connection-status.error { color: var(--maera); }
+.user-menu { align-items: center; display: flex; gap: 12px; }
+.user-menu span { color: var(--ink); font-size: 11px; font-weight: 800; text-transform: capitalize; }
+.user-menu button { background: transparent; border: 0; color: var(--muted); font-size: 10px; font-weight: 800; padding: 6px; text-transform: uppercase; }
+.user-menu button:hover { color: var(--maera); }
+
+.login-page { align-items: center; display: flex; justify-content: center; min-height: 100vh; padding: 24px; }
+.login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-width: 390px; padding: 30px 28px 28px; text-align: center; width: 100%; }
+.login-card img { display: block; height: 54px; margin: 0 auto 22px; max-width: 220px; object-fit: contain; }
+.login-card h1 { color: var(--ink); font-size: 20px; margin: 0 0 6px; }
+.login-card > p { color: var(--muted); font-size: 12px; margin: 0 0 22px; }
+.login-card form { display: grid; gap: 12px; text-align: left; }
+.login-card .button { margin-top: 4px; width: 100%; }
+.login-error { background: var(--maera-soft); border-radius: 7px; color: var(--maera); font-size: 11px; font-weight: 700; padding: 10px; text-align: center; }
 
 .page { margin: 0 auto; max-width: 1440px; padding: 38px 24px 48px; }
 .hero { align-items: end; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr) 340px; margin-bottom: 28px; }

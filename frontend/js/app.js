@@ -52,6 +52,10 @@ async function loadComponents() {
 }
 
 async function readApiError(response) {
+  if (response.status === 401) {
+    window.location.href = window.APP_CONFIG?.ROOT_URL || "/";
+    return "Sessão expirada.";
+  }
   try {
     const data = await response.json();
     return data.message || data.error || `Erro ${response.status} na requisição.`;
