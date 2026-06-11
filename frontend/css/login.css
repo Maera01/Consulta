@@ -1,0 +1,79 @@
+html,
+body.login-page {
+  height: 100%;
+}
+
+body.login-page {
+  align-items: center;
+  background: #f4f5f7;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.login-page .login-card {
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .10);
+  display: block;
+  flex: 0 0 auto;
+  margin: auto;
+  max-width: 390px;
+  padding: 28px;
+  text-align: center;
+  width: calc(100vw - 48px);
+}
+
+.login-page .login-card img {
+  display: block;
+  height: 54px;
+  margin: 0 auto 20px;
+  max-width: 220px;
+  object-fit: contain;
+  width: auto;
+}
+
+.login-page .login-card h1 {
+  color: #0b0b0c;
+  font-size: 20px;
+  margin: 0 0 6px;
+}
+
+.login-page .login-card > p {
+  color: #6b7280;
+  font-size: 12px;
+  margin: 0 0 22px;
+}
+
+.login-page .login-card form {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.login-page .login-card label,
+.login-page .login-card input,
+.login-page .login-card button {
+  max-width: 100%;
+  width: 100%;
+}
+
+.login-page .login-card button {
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+@media (max-width: 480px) {
+  body.login-page {
+    padding: 16px;
+  }
+
+  .login-page .login-card {
+    padding: 26px 20px;
+    width: calc(100vw - 32px);
+  }
+}
