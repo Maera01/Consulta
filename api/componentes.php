@@ -19,6 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
+// Compatibilidade com serviços Render criados antes da rota /api/health.php.
+// Retorna apenas o estado do serviço; nenhum componente é exposto.
+if (str_starts_with((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 'Render/')) {
+    echo json_encode(['status' => 'ok'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 requireAuthenticatedApi();
 
 try {
