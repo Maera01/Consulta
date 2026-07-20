@@ -1,7 +1,3 @@
-<?php
-require_once __DIR__ . '/../api/auth.php';
-$currentUser = requireAuthenticatedPage();
-?>
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -18,8 +14,8 @@ $currentUser = requireAuthenticatedPage();
     <a class="brand" href="/" aria-label="Maera">
       <img src="./img/logo_header.png" alt="Maera">
     </a>
-    <form class="user-menu" method="post" action="<?= htmlspecialchars(appRootPath(), ENT_QUOTES, 'UTF-8') ?>">
-      <span><?= htmlspecialchars($currentUser['login'], ENT_QUOTES, 'UTF-8') ?></span>
+    <form class="user-menu" id="logout-form">
+      <span id="current-user"></span>
       <button name="logout" value="1" type="submit">Sair</button>
     </form>
   </header>
@@ -28,11 +24,11 @@ $currentUser = requireAuthenticatedPage();
     <section class="hero">
       <div>
         <h1>Consulta de componentes</h1>
-        <p>Pesquise por código ou descrição e selecione os itens que deseja solicitar.</p>
+        <p>Pesquise por codigo ou descricao e acompanhe se o item esta disponivel no estoque atual.</p>
       </div>
       <div class="metric">
         <strong id="total-components">0</strong>
-        <span>componentes disponíveis</span>
+        <span>itens cadastrados</span>
       </div>
     </section>
 
@@ -42,16 +38,19 @@ $currentUser = requireAuthenticatedPage();
           <div>
             <h2>Componentes</h2>
           </div>
-          <button class="button button-ghost" id="clear-filters" type="button">Limpar filtros</button>
+          <div class="filter-actions">
+            <button class="button button-toggle" id="available-only" type="button" aria-pressed="false">Somente disponiveis</button>
+            <button class="button button-ghost" id="clear-filters" type="button">Limpar filtros</button>
+          </div>
         </div>
 
         <form class="filters" id="filters">
           <label>
-            <span>Código</span>
+            <span>Codigo</span>
             <input name="codigo" placeholder="Ex.: 10234" autocomplete="off">
           </label>
           <label class="filter-description">
-            <span>Descrição</span>
+            <span>Descricao</span>
             <input name="descricao" placeholder="Ex.: resistor 6k 0805" autocomplete="off">
           </label>
         </form>
@@ -61,29 +60,31 @@ $currentUser = requireAuthenticatedPage();
             <thead>
               <tr>
                 <th class="check-column"><span class="sr-only">Selecionar</span></th>
-                <th><button data-sort="codigo">Código</button></th>
-                <th><button data-sort="descricao">Descrição</button></th>
+                <th><button data-sort="codigo">Codigo</button></th>
+                <th><button data-sort="descricao">Descricao</button></th>
+                <th><button data-sort="status">Status</button></th>
+                <th><button data-sort="status_cadastro">Cadastro</button></th>
               </tr>
             </thead>
             <tbody id="component-rows"></tbody>
           </table>
           <div class="empty-state" id="empty-state" hidden>
             <strong>Nenhum componente encontrado.</strong>
-            <span>Revise os filtros ou tente uma descrição mais ampla.</span>
+            <span>Revise os filtros ou tente uma descricao mais ampla.</span>
           </div>
         </div>
 
         <footer class="pagination">
-          <span id="page-info">Página 1 de 1</span>
+          <span id="page-info">Pagina 1 de 1</span>
           <div>
-            <button class="icon-button" id="previous-page" aria-label="Página anterior">←</button>
-            <button class="icon-button" id="next-page" aria-label="Próxima página">→</button>
+            <button class="icon-button" id="previous-page" aria-label="Pagina anterior">&larr;</button>
+            <button class="icon-button" id="next-page" aria-label="Proxima pagina">&rarr;</button>
           </div>
         </footer>
       </div>
 
       <aside class="request-panel card">
-        <span class="eyebrow">Solicitação</span>
+        <span class="eyebrow">Solicitacao</span>
         <div class="request-title">
           <h2>Itens selecionados</h2>
           <span class="count-badge" id="selected-count">0</span>
@@ -91,21 +92,21 @@ $currentUser = requireAuthenticatedPage();
         <div class="selected-list" id="selected-list">
           <div class="selection-empty">
             <span>+</span>
-            <p>Selecione componentes na tabela para montar sua solicitação.</p>
+            <p>Selecione componentes disponiveis na tabela para montar sua solicitacao.</p>
           </div>
         </div>
         <div class="request-actions">
-          <button class="button button-primary" id="copy-request" disabled>Copiar solicitação</button>
-          <button class="button button-ghost" id="clear-selection" disabled>Limpar seleção</button>
+          <button class="button button-primary" id="copy-request" disabled>Copiar solicitacao</button>
+          <button class="button button-ghost" id="clear-selection" disabled>Limpar selecao</button>
         </div>
       </aside>
     </section>
 
     <section class="import-card card">
       <div>
-        <span class="eyebrow">Administração</span>
-        <h2>Importar planilha</h2>
-        <p>Envie o relatório de estoque XLS, XLSX ou CSV. O sistema localiza automaticamente as colunas de código e descrição.</p>
+        <span class="eyebrow">Administracao</span>
+        <h2>Atualizar estoque atual</h2>
+        <p>Envie o relatorio de estoque XLS, XLSX ou CSV. Itens encontrados ficam disponiveis; itens cadastrados que nao vierem na lista ficam indisponiveis.</p>
       </div>
       <form class="import-form" id="import-form">
         <label class="file-field">
@@ -116,7 +117,7 @@ $currentUser = requireAuthenticatedPage();
           <span>Senha</span>
           <input id="import-password" name="senha" type="password" inputmode="numeric" autocomplete="current-password" required>
         </label>
-        <button class="button button-primary" id="import-button" type="submit">Atualizar banco</button>
+        <button class="button button-primary" id="import-button" type="submit">Atualizar estoque</button>
       </form>
     </section>
   </main>

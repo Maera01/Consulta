@@ -1,0 +1,21 @@
+{
+  "name": "consulta-componentes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Consulta de componentes com frontend HTML e backend Node.js.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "fast-xml-parser": "^5.9.2",
+    "jszip": "^3.10.1",
+    "multer": "^2.0.2",
+    "pg": "^8.16.3",
+    "sql.js": "^1.13.0"
+  }
+}

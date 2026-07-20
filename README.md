@@ -2,8 +2,9 @@
 
 ## Configuração local
 
-1. No XAMPP, confirme que as extensões PHP `pdo_sqlite`, `zip`, `mbstring` e `simplexml` estão habilitadas.
-2. Acesse `http://localhost/consulta-componente/frontend/`.
+1. Instale as dependências com `npm install`.
+2. Inicie o servidor com `npm start`.
+3. Acesse `http://localhost:3000/`.
 
 O banco local fica em `database/componentes.sqlite` e é criado automaticamente. Ao importar uma planilha, os dados são gravados nesse arquivo e ficam disponíveis na consulta.
 
@@ -15,17 +16,17 @@ A importação aceita o relatório `.xls` XML exportado pelo sistema, além de `
 
 No relatório do sistema, o cabeçalho útil é localizado automaticamente e as colunas são mapeadas assim:
 
-- `# Prod.` → código
-- `Descrição` → descrição
+- `# Prod.` -> código
+- `Descrição` -> descrição
 
 Na importação, componentes com o mesmo `codigo` são atualizados. Códigos que ainda não existem são inseridos. Linhas vazias são ignoradas e, se um código se repetir na planilha, a última ocorrência prevalece.
 
 ## Deploy no Render
 
-O projeto usa Docker porque o Render não possui runtime PHP nativo.
+O projeto usa Node.js.
 
-1. No Render, crie um novo **Blueprint** usando este repositório, ou altere o runtime do serviço para **Docker**.
-2. O Render utilizará automaticamente o `Dockerfile` e o `render.yaml`.
+1. No Render, crie um novo **Blueprint** usando este repositório, ou altere o runtime do serviço para **Node**.
+2. O Render utilizará o `render.yaml`, executando `npm install` no build e `npm start` para iniciar o servidor.
 
 O SQLite funciona no Render, mas no plano gratuito os dados enviados por planilha podem ser perdidos após um novo deploy ou reinicialização. Para persistência permanente, utilize um Persistent Disk ou banco externo.
 
@@ -45,6 +46,6 @@ Quando `DATABASE_URL` estiver configurada, consultas e importações usam o Neon
 
 ## Usuários
 
-O acesso ao aplicativo exige login. Os usuários ficam na tabela `public.usuarios`, e as senhas são armazenadas somente como hashes bcrypt.
+O acesso ao aplicativo exige login. Os usuários ficam na tabela `usuarios` no SQLite local ou `public.usuarios` no Neon, e as senhas são armazenadas somente como hashes bcrypt.
 
 O arquivo local `database/usuarios-seed.sql` contém a carga inicial gerada a partir da planilha de usuários e não é enviado ao GitHub. Execute esse arquivo no SQL Editor do Neon após executar `database/neon-schema.sql`.

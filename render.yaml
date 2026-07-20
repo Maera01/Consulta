@@ -1,10 +1,13 @@
 services:
   - type: web
     name: consulta-componentes
-    runtime: docker
-    dockerfilePath: ./Dockerfile
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
     autoDeploy: true
-    healthCheckPath: /api/health.php
+    healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
         sync: false
+      - key: SESSION_SECRET
+        generateValue: true

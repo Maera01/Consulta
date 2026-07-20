@@ -70,6 +70,7 @@ button { cursor: pointer; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); }
 .catalog { min-width: 0; overflow: hidden; }
 .section-heading { align-items: end; display: flex; justify-content: space-between; padding: 24px 26px 20px; }
+.filter-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 h2 { color: var(--ink); font-size: 19px; margin: 5px 0 0; }
 .filters { background: #fafafa; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); display: grid; gap: 12px; grid-template-columns: 220px 1fr; padding: 16px 26px; }
 label span { color: var(--muted); display: block; font-size: 10px; font-weight: 800; letter-spacing: .8px; margin-bottom: 6px; text-transform: uppercase; }
@@ -86,6 +87,11 @@ tbody tr.is-selected { background: var(--maera-soft); }
 .check-column { padding-left: 26px; width: 52px; }
 .row-check { accent-color: var(--maera); height: 16px; width: 16px; }
 .code { color: var(--ink); font-weight: 800; }
+.status-badge { border-radius: 999px; display: inline-flex; font-size: 10px; font-weight: 900; justify-content: center; letter-spacing: .4px; min-width: 96px; padding: 6px 10px; text-transform: uppercase; }
+.status-badge.available { background: #eaf8ef; color: var(--success); }
+.status-badge.unavailable { background: #f3f4f6; color: #6b7280; }
+.registration-badge { background: #fff3ee; border-radius: 999px; color: var(--maera); display: inline-flex; font-size: 10px; font-weight: 900; justify-content: center; letter-spacing: .4px; min-width: 110px; padding: 6px 10px; text-transform: uppercase; }
+.muted-cell { color: var(--muted); }
 .empty-state { align-items: center; color: var(--muted); display: flex; flex-direction: column; gap: 8px; justify-content: center; min-height: 390px; text-align: center; }
 .empty-state[hidden] { display: none; }
 .empty-state strong { color: var(--ink); font-size: 15px; }
@@ -116,6 +122,8 @@ tbody tr.is-selected { background: var(--maera-soft); }
 .button-primary:hover:not(:disabled) { background: var(--maera-hover); }
 .button-secondary { background: white; border-color: var(--maera); color: var(--maera); }
 .button-ghost { background: transparent; color: var(--muted); }
+.button-toggle { background: white; border-color: var(--border); color: var(--muted); }
+.button-toggle.is-active { background: #eaf8ef; border-color: #b7ebc8; color: var(--success); }
 
 .toast { background: var(--ink); border-left: 4px solid var(--maera); border-radius: 8px; bottom: 24px; color: white; font-size: 12px; font-weight: 600; opacity: 0; padding: 14px 18px; pointer-events: none; position: fixed; right: 24px; transform: translateY(12px); transition: .25s ease; }
 .toast.show { opacity: 1; transform: translateY(0); }
@@ -137,4 +145,5 @@ tbody tr.is-selected { background: var(--maera-soft); }
   .import-form { flex-basis: auto; width: 100%; }
   .filters { grid-template-columns: 1fr; }
   .section-heading { align-items: start; gap: 16px; }
+  .filter-actions { justify-content: flex-start; }
 }
