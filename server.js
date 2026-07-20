@@ -44,6 +44,7 @@ app.use(session({
 }));
 
 app.get("/api/health", (_request, response) => {
+  response.set("Access-Control-Allow-Origin", "*");
   response.json({ status: "ok", service: "consulta-componentes" });
 });
 
