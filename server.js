@@ -22,6 +22,9 @@ const IMPORT_PASSWORD_HASH = process.env.IMPORT_PASSWORD_HASH || "";
 const ROOT_DIR = __dirname;
 const DATABASE_PATH = path.join(ROOT_DIR, "database", "componentes.sqlite");
 const SESSION_SECRET_FALLBACK = crypto.randomBytes(32).toString("hex");
+const HEALTH_CHECK_ORIGINS = new Set([
+  "https://consulta-static.onrender.com",
+]);
 
 if (IS_PRODUCTION && !SESSION_SECRET) {
   console.warn("SESSION_SECRET nao configurado. Usando segredo temporario; configure a variavel no Render.");
@@ -84,7 +87,12 @@ app.use(session({
   },
 }));
 
-app.get("/api/health", (_request, response) => {
+app.get("/api/health", (request, response) => {
+  const origin = request.get("origin");
+  if (HEALTH_CHECK_ORIGINS.has(origin)) {
+    response.set("Access-Control-Allow-Origin", origin);
+    response.set("Vary", "Origin");
+  }
   response.json({ status: "ok", service: "consulta-componentes" });
 });
 
