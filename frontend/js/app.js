@@ -9,6 +9,7 @@ const state = {
   direction: "asc",
   availableOnly: false,
   selected: new Map(),
+  csrfToken: "",
 };
 
 const rows = document.querySelector("#component-rows");
@@ -30,6 +31,7 @@ async function loadCurrentUser() {
     window.location.href = window.APP_CONFIG.ROOT_URL;
     return;
   }
+  state.csrfToken = data.csrfToken || "";
   document.querySelector("#current-user").textContent = data.user.login;
 }
 
@@ -197,7 +199,11 @@ copyButton.addEventListener("click", async () => {
 
 document.querySelector("#logout-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  await fetch(window.APP_CONFIG.LOGOUT_API_URL, { method: "POST", credentials: "same-origin" });
+  await fetch(window.APP_CONFIG.LOGOUT_API_URL, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "X-CSRF-Token": state.csrfToken },
+  });
   window.location.href = window.APP_CONFIG.ROOT_URL;
 });
 
@@ -212,7 +218,12 @@ importForm.addEventListener("submit", async (event) => {
     const body = new FormData();
     body.append("planilha", file);
     body.append("senha", document.querySelector("#import-password").value);
-    const response = await fetch(IMPORT_API_URL, { method: "POST", body, credentials: "same-origin" });
+    const response = await fetch(IMPORT_API_URL, {
+      method: "POST",
+      body,
+      credentials: "same-origin",
+      headers: { "X-CSRF-Token": state.csrfToken },
+    });
     if (!response.ok) throw new Error(await readApiError(response));
 
     const result = await response.json();

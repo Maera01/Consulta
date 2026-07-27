@@ -3,6 +3,8 @@ const fs = require("fs");
 const crypto = require("crypto");
 const express = require("express");
 const session = require("express-session");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const multer = require("multer");
 const bcrypt = require("bcryptjs");
 const initSqlJs = require("sql.js");
@@ -14,14 +16,34 @@ const { Pool } = require("pg");
 const PORT = Number(process.env.PORT || 3000);
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_ROWS = 20000;
-const IMPORT_PASSWORD_HASH = "$2y$10$7szlbb6EdCQoYBvdvumW6emS/Nu4ijtqncg6w.e/xNO1jUMMXGvt6";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const IMPORT_PASSWORD_HASH = process.env.IMPORT_PASSWORD_HASH || "";
 const ROOT_DIR = __dirname;
 const DATABASE_PATH = path.join(ROOT_DIR, "database", "componentes.sqlite");
+
+if (IS_PRODUCTION && !SESSION_SECRET) {
+  throw new Error("SESSION_SECRET nao configurado.");
+}
 
 const app = express();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE },
+});
+const loginRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas de login. Tente novamente em alguns minutos." },
+});
+const importRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas de importacao. Tente novamente em alguns minutos." },
 });
 
 let SQL;
@@ -29,31 +51,52 @@ let sqliteDb;
 let pgPool;
 
 app.set("trust proxy", 1);
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+app.disable("x-powered-by");
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      baseUri: ["'self'"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      formAction: ["'self'"],
+      frameAncestors: ["'self'"],
+      imgSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "https://fonts.googleapis.com"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: "same-origin" },
+}));
+app.use(express.urlencoded({ extended: false, limit: "100kb" }));
+app.use(express.json({ limit: "100kb" }));
 app.use(session({
   name: "consulta_componentes_session",
-  secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
+  secret: SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: IS_PRODUCTION,
+    maxAge: 8 * 60 * 60 * 1000,
   },
 }));
 
 app.get("/api/health", (_request, response) => {
-  response.set("Access-Control-Allow-Origin", "*");
   response.json({ status: "ok", service: "consulta-componentes" });
 });
 
 app.get("/api/me", (request, response) => {
   const user = authenticatedUser(request);
-  response.json({ authenticated: Boolean(user), user });
+  response.json({
+    authenticated: Boolean(user),
+    user,
+    csrfToken: user ? ensureCsrfToken(request) : null,
+  });
 });
 
-app.post("/api/login", async (request, response) => {
+app.post("/api/login", loginRateLimiter, async (request, response) => {
   try {
     const login = normalizeLogin(String(request.body.login || ""));
     const password = String(request.body.senha || "");
@@ -71,6 +114,7 @@ app.post("/api/login", async (request, response) => {
       if (error) return response.status(500).json({ error: "Não foi possível iniciar a sessão." });
       request.session.usuario_id = user.id;
       request.session.usuario_login = user.login;
+      request.session.csrfToken = crypto.randomBytes(32).toString("hex");
       response.json({ ok: true, user: { id: user.id, login: user.login } });
     });
   } catch {
@@ -78,7 +122,7 @@ app.post("/api/login", async (request, response) => {
   }
 });
 
-app.post("/api/logout", (request, response) => {
+app.post("/api/logout", requireAuthenticatedApi, requireCsrfToken, (request, response) => {
   request.session.destroy(() => {
     response.clearCookie("consulta_componentes_session");
     response.json({ ok: true });
@@ -105,8 +149,12 @@ app.get("/api/componentes", requireAuthenticatedApi, async (request, response) =
   }
 });
 
-app.post("/api/importar-componentes", requireAuthenticatedApi, upload.single("planilha"), async (request, response) => {
+app.post("/api/importar-componentes", requireAuthenticatedApi, importRateLimiter, requireCsrfToken, upload.single("planilha"), async (request, response) => {
   try {
+    if (!IMPORT_PASSWORD_HASH) {
+      return response.status(503).json({ error: "Importacao temporariamente indisponivel." });
+    }
+
     const password = String(request.body.senha || "");
     if (!bcrypt.compareSync(password, normalizeBcryptHash(IMPORT_PASSWORD_HASH))) {
       return response.status(400).json({ error: "Senha de importação inválida." });
@@ -147,14 +195,29 @@ app.post("/api/importar-componentes", requireAuthenticatedApi, upload.single("pl
   }
 });
 
-app.use("/frontend", express.static(path.join(ROOT_DIR, "frontend"), { extensions: ["html"] }));
-app.use(express.static(ROOT_DIR, { extensions: ["html"] }));
-
-app.use((request, response) => {
-  if (request.path.startsWith("/frontend")) {
-    return response.sendFile(path.join(ROOT_DIR, "frontend", "index.html"));
-  }
+app.get("/", (_request, response) => {
   response.sendFile(path.join(ROOT_DIR, "index.html"));
+});
+
+app.use("/frontend", express.static(path.join(ROOT_DIR, "frontend"), {
+  dotfiles: "deny",
+  extensions: ["html"],
+  index: "index.html",
+}));
+
+app.use("/frontend", (request, response) => {
+  if (!["GET", "HEAD"].includes(request.method)) {
+    return response.status(404).json({ error: "Rota nao encontrada." });
+  }
+  response.status(404).sendFile(path.join(ROOT_DIR, "frontend", "index.html"));
+});
+
+app.use("/api", (_request, response) => {
+  response.status(404).json({ error: "Rota da API nao encontrada." });
+});
+
+app.use((_request, response) => {
+  response.status(404).type("text/plain").send("Not found");
 });
 
 async function start() {
@@ -184,6 +247,26 @@ function authenticatedUser(request) {
 function requireAuthenticatedApi(request, response, next) {
   if (!authenticatedUser(request)) {
     return response.status(401).json({ error: "Sessão expirada. Entre novamente." });
+  }
+  next();
+}
+
+function ensureCsrfToken(request) {
+  if (!request.session.csrfToken) {
+    request.session.csrfToken = crypto.randomBytes(32).toString("hex");
+  }
+  return request.session.csrfToken;
+}
+
+function requireCsrfToken(request, response, next) {
+  const expected = request.session?.csrfToken || "";
+  const received = String(request.get("x-csrf-token") || "");
+  const isValid = expected.length > 0
+    && received.length === expected.length
+    && crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected));
+
+  if (!isValid) {
+    return response.status(403).json({ error: "Token de seguranca invalido." });
   }
   next();
 }

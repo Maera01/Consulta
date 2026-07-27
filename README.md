@@ -30,6 +30,16 @@ O projeto usa Node.js.
 
 O SQLite funciona no Render, mas no plano gratuito os dados enviados por planilha podem ser perdidos após um novo deploy ou reinicialização. Para persistência permanente, utilize um Persistent Disk ou banco externo.
 
+## Variaveis de ambiente
+
+Configure no Render:
+
+- `SESSION_SECRET`: segredo forte de sessao. O `render.yaml` gera este valor automaticamente em novos Blueprints.
+- `IMPORT_PASSWORD_HASH`: hash bcrypt da senha administrativa de importacao. Nunca coloque este hash direto no codigo.
+- `DATABASE_URL`: connection string do Neon/PostgreSQL, quando o banco externo estiver em uso.
+
+Se `IMPORT_PASSWORD_HASH` nao estiver configurada, a consulta continua funcionando, mas a rota de importacao fica indisponivel por seguranca.
+
 ## Schema do Neon
 
 Execute `database/neon-schema.sql` no SQL Editor do Neon para criar a tabela PostgreSQL de componentes, índices de pesquisa e atualização automática da data de alteração.
