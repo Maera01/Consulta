@@ -38,7 +38,9 @@ Configure no Render:
 - `IMPORT_PASSWORD_HASH`: hash bcrypt da senha administrativa de importacao. Nunca coloque este hash direto no codigo.
 - `DATABASE_URL`: connection string do Neon/PostgreSQL, quando o banco externo estiver em uso.
 
-Se `IMPORT_PASSWORD_HASH` nao estiver configurada, a consulta continua funcionando, mas a rota de importacao fica indisponivel por seguranca.
+Em servicos Render ja existentes, crie `SESSION_SECRET` manualmente no painel Environment. O `generateValue` do `render.yaml` so e aplicado automaticamente em Blueprints novos.
+
+Se `SESSION_SECRET` nao estiver configurada, o servidor sobe com um segredo temporario e as sessoes podem cair em reinicios. Se `IMPORT_PASSWORD_HASH` nao estiver configurada, a consulta continua funcionando, mas a rota de importacao fica indisponivel por seguranca.
 
 ## Schema do Neon
 

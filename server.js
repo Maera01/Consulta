@@ -21,9 +21,10 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const IMPORT_PASSWORD_HASH = process.env.IMPORT_PASSWORD_HASH || "";
 const ROOT_DIR = __dirname;
 const DATABASE_PATH = path.join(ROOT_DIR, "database", "componentes.sqlite");
+const SESSION_SECRET_FALLBACK = crypto.randomBytes(32).toString("hex");
 
 if (IS_PRODUCTION && !SESSION_SECRET) {
-  throw new Error("SESSION_SECRET nao configurado.");
+  console.warn("SESSION_SECRET nao configurado. Usando segredo temporario; configure a variavel no Render.");
 }
 
 const app = express();
@@ -72,7 +73,7 @@ app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 app.use(express.json({ limit: "100kb" }));
 app.use(session({
   name: "consulta_componentes_session",
-  secret: SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
+  secret: SESSION_SECRET || SESSION_SECRET_FALLBACK,
   resave: false,
   saveUninitialized: false,
   cookie: {
